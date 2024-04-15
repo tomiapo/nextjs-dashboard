@@ -9,12 +9,13 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
-import { unstable_noStore as noStore } from 'next/cache';
+// import { unstable_noStore as noStore } from 'next/cache';
 
 export async function fetchRevenue() {
   // Add noStore() here to prevent the response from being cached.
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
-  noStore()
+
+  // noStore()
 
   try {
     // Artificially delay a response for demo purposes.
@@ -35,7 +36,7 @@ export async function fetchRevenue() {
 }
 
 export async function fetchLatestInvoices() {
-  noStore()
+  // noStore()
   try {
     const data = await sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
@@ -57,7 +58,7 @@ export async function fetchLatestInvoices() {
 }
 
 export async function fetchCardData() {
-  noStore()
+  // noStore()
   try {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
@@ -69,11 +70,23 @@ export async function fetchCardData() {
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
          FROM invoices`;
 
-    const data = await Promise.all([
-      invoiceCountPromise,
-      customerCountPromise,
-      invoiceStatusPromise,
-    ]);
+    const invoiceCountResult = await invoiceCountPromise;
+    const customerCountResult = await customerCountPromise;
+
+    let invoiceStatusResult
+
+    await new Promise(async (resolve) => {  // demoramos este fetch artificialmente
+      setTimeout(resolve, 3000)
+      invoiceStatusResult = await invoiceStatusPromise;
+    });
+
+    const data = [invoiceCountResult, customerCountResult, invoiceStatusResult]
+
+    // const data = await Promise.all([
+    //   invoiceCountPromise,
+    //   customerCountPromise,
+    //   invoiceStatusPromise,
+    // ]);
 
     const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
     const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
@@ -98,7 +111,7 @@ export async function fetchFilteredInvoices(
   currentPage: number,
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-  noStore()
+  // noStore()
   try {
     const invoices = await sql<InvoicesTable>`
       SELECT
@@ -129,7 +142,7 @@ export async function fetchFilteredInvoices(
 }
 
 export async function fetchInvoicesPages(query: string) {
-  noStore()
+  // noStore()
   try {
     const count = await sql`SELECT COUNT(*)
     FROM invoices
