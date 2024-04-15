@@ -1,32 +1,32 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
-import {z} from 'zod'
-import { getUser } from "./app/lib/data"
-import bcrypt from 'bcryptjs'
+// import NextAuth from "next-auth"
+// import Credentials from "next-auth/providers/credentials"
+// import {z} from 'zod'
+// import { getUser } from "./app/lib/data"
+// import bcrypt from 'bcryptjs'
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+// export const { handlers, signIn, signOut, auth } = NextAuth({
     
-  providers: [
-    Credentials(
-        {
-            async authorize(credentials) {   // esta funcion se ejecuta cuando intento loguearme
-                const parsedCredentials = z
-                    .object({ email: z.string().email(), password: z.string().min(6) })
-                    .safeParse(credentials);
+//   providers: [
+//     Credentials(
+//         {
+//             async authorize(credentials) {   // esta funcion se ejecuta cuando intento loguearme
+//                 const parsedCredentials = z
+//                     .object({ email: z.string().email(), password: z.string().min(6) })
+//                     .safeParse(credentials);
 
-                if (parsedCredentials.success) {
-                    const { email, password } = parsedCredentials.data;
-                    const user = await getUser(email);
-                    if (!user) return null;
-                    const passwordsMatch = await bcrypt.compare(password, user.password);
+//                 if (parsedCredentials.success) {
+//                     const { email, password } = parsedCredentials.data;
+//                     const user = await getUser(email);
+//                     if (!user) return null;
+//                     const passwordsMatch = await bcrypt.compare(password, user.password);
 
-                    if (passwordsMatch) return user;
+//                     if (passwordsMatch) return user;
 
-                }
-                console.log('Invalid credentials');
-                return null;
-            },
-        }
-    )
-  ],
-})
+//                 }
+//                 console.log('Invalid credentials');
+//                 return null;
+//             },
+//         }
+//     )
+//   ],
+// })
