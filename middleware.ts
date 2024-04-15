@@ -1,12 +1,19 @@
-import NextAuth from 'next-auth';
-import { authConfig } from './auth.config';
- 
-export default NextAuth(authConfig).auth; 
+import { NextRequest } from "next/server";
+import { auth } from "./auth";
 
-/* Middleware file must export a single function, 
-  either as a default export or named middleware. 
-  Note that multiple middleware from the same file are not supported. 
-*/
+export async function middleware(request : NextRequest){
+
+    const session = await auth()
+
+    if (session?.user && !request.nextUrl.pathname.startsWith('/dashboard')) {  // usuario logueado, pero no esta en /dashboard
+        return Response.redirect(new URL('/dashboard', request.url))
+    }
+
+    if (!session?.user && !request.nextUrl.pathname.startsWith('/login'))  {    // usuario no logueado, y no esta en /login
+        return Response.redirect(new URL('/login', request.url))
+    }
+
+}
 
 export const config = {
   // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
